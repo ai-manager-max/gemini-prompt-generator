@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Prompt Generátor (Vercel)</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; background: #f9f9f9; }
+        h1 { color: #000; }
+        input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; }
+        button { padding: 12px 24px; font-size: 16px; background: #000; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; }
+        button:hover { background: #333; }
+        #result { margin-top: 20px; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; white-space: pre-wrap; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <h1>🚀 Gemini Prompt Generátor</h1>
+    <input type="text" id="topic" placeholder="Írd be a témát (pl. Cyberpunk macska)">
+    <button onclick="generatePrompt()">Prompt Generálása</button>
+    <div id="result"></div>
+
+    <script>
+        async function generatePrompt() {
+            const topic = document.getElementById('topic').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!topic) {
+                resultDiv.innerText = "Kérlek, adj meg egy témát!";
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            resultDiv.innerText = "⏳ Generálás folyamatban...";
+            resultDiv.style.display = 'block';
+            document.querySelector('button').disabled = true;
+
+            try {
+                // A Vercel az /api/generate útvonalat automatikusan a generate.js-re irányítja
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultDiv.innerText = "❌ Hiba: " + data.error;
+                } else {
+                    resultDiv.innerText = "✅ " + data.prompt;
+                }
+            } catch (error) {
+                resultDiv.innerText = "❌ Hálózati hiba történt.";
+            } finally {
+                document.querySelector('button').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
